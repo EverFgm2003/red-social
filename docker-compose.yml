@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: social_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ever2026*
+      POSTGRES_DB: red_social
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d red_social"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build: ./backend/auth-service
+    container_name: auth-service
+    environment:
+      PORT: 3001
+      JWT_SECRET: RedSocial2026*
+      DATABASE_URL: "postgresql://postgres:Ever2026%2A@postgres:5432/red_social?schema=public"
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  posts-service:
+    build: ./backend/posts-service
+    container_name: posts-service
+    environment:
+      PORT: 3002
+      JWT_SECRET: RedSocial2026*
+      DATABASE_URL: "postgresql://postgres:Ever2026%2A@postgres:5432/red_social?schema=public"
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    restart: on-failure
+
+volumes:
+  pgdata:
