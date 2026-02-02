@@ -16,6 +16,7 @@ interface PostStore {
   error: string;
   fetchPosts: () => Promise<void>;
   addPost: (post: Post) => void;
+  updatePost: (post: Post) => void;
   clearError: () => void;
 }
 
@@ -30,16 +31,23 @@ export const usePostStore = create<PostStore>((set) => ({
       const postsData = await getAllPosts();
       set({ posts: postsData, loading: false });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar publicaciones';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error al cargar publicaciones';
       set({ error: errorMessage, loading: false });
     }
   },
 
-  addPost: (post) => {
-    set((state) => ({ 
-      posts: [post, ...state.posts] 
-    }));
-  },
+  addPost: (post) =>
+    set((state) => ({
+      posts: [post, ...state.posts],
+    })),
+
+  updatePost: (updatedPost) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === updatedPost.id ? updatedPost : post
+      ),
+    })),
 
   clearError: () => set({ error: '' }),
 }));

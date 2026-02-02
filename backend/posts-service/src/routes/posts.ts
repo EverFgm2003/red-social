@@ -12,6 +12,12 @@ router.post(
   upload.single("image"),
   postController.createPost.bind(postController)
 );
+router.post(
+  "/update",
+  authenticate,
+  upload.single("image"),
+  postController.updatePost.bind(postController)
+);
 router.get("/", postController.getAllPosts.bind(postController));
 
 export default router;

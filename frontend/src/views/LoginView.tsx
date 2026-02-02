@@ -22,7 +22,7 @@ const LoginView: React.FC = () => {
       const data = await login(identifier, password);
       addNotification(
         'success', 
-        '¡Publicación creada exitosamente!'
+        'Inicio de sesión exitoso!'
       );
       navigate('/home');
     } catch (err) {

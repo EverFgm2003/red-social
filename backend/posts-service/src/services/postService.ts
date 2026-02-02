@@ -65,4 +65,43 @@ export class PostService {
         }
     }
 
+
+    async updatePost(
+        postId: number,
+        userId: number,
+        message: string,
+        imageUrl: string | null
+    ): Promise<PostResponse> {        
+        if (message.length > 5000) {
+        throw new ValidationError("El mensaje es muy largo (máximo 5000 caracteres)");
+        }
+
+        try {
+        const result = await pool.query(
+            `UPDATE posts set message= ($2) , image_url = ($3) , created_at= NOW()  where id = $1
+            RETURNING *`,
+            [postId, message.trim(), imageUrl]
+        );
+        
+        const post = result.rows[0];
+
+        const userResult = await pool.query(
+            "SELECT username FROM users WHERE id = $1",
+            [userId]
+        );
+
+        return {
+            id: post.id,
+            user_id: post.user_id,
+            username: userResult.rows[0].username,
+            message: post.message,
+            image_url: post.image_url,
+            created_at: post.created_at,
+        };
+        } catch (error) {
+        console.error("Error al crear post:", error);
+        throw error;
+        }
+    }
+
 }

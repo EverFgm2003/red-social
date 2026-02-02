@@ -85,3 +85,46 @@ export const getAllPosts = async (): Promise<any[]> => {
     throw new Error('Error de conexión con el servidor');
   }
 };
+
+export const updatePost = async (
+  idPost:number,
+  message: string,
+  image: File | null
+): Promise<CreatePostResponse['data']> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      logout();
+      throw new Error('No estás autenticado. Por favor inicia sesión.');
+    }
+
+    const formData = new FormData();
+    formData.append('postId', idPost.toString());
+    formData.append('message', message);
+    
+    if (image) {
+      formData.append('image', image);
+    }
+
+    const response = await fetch(`${POSTS_SERVICE_URL}/posts/update`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data: CreatePostResponse | ErrorResponse = await response.json();
+
+    if (!response.ok) {
+      throw new Error((data as ErrorResponse).message || 'Error al crear publicación');
+    }
+
+    return (data as CreatePostResponse).data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Error de conexión con el servidor');
+  }
+};

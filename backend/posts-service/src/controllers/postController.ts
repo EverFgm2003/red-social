@@ -39,4 +39,26 @@ export class PostController {
         }
     }
 
+    async updatePost(req: Request, res: Response, next: NextFunction) {
+        try {
+        const { message } = req.body;
+        const userId = req.user!.id; 
+        const { postId } = req.body;
+
+        let imageUrl: string | null = null;
+        if (req.file) {
+            imageUrl = `/uploads/${req.file.filename}`;
+        }
+
+        const post = await postService.updatePost(postId,userId, message, imageUrl);
+
+        res.status(201).json({
+            status: "success",
+            data: post,
+        });
+        } catch (error) {
+        next(error);
+        }
+    }
+
 }
